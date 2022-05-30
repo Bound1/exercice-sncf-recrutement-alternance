@@ -1,0 +1,11 @@
+#titre_de_la_page{
+    text-align: center;
+    font-size:x-large;
+    font-weight: bold;
+    color: green;
+}
+body{
+    background-image: url("photo_train.jpg");
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
