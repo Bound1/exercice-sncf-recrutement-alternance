@@ -34,21 +34,17 @@
                         {donnee_choix_train:train},
                             function(data){
                                 trains_jours=data["circulation_trains"];     
-                                $("#affichage_trains").prepend(`<p style="text-align: center;">Voici la fréquence du train ${train} : </p>`);                                                            
+                                $("#affichage_trains").prepend(`<p style="text-align: center;font-weight: bold;">Voici la fréquence du train ${train} : </p>`);                                                            
                                 $("#affichage_trains table tbody").append(`<th scope="row">${train}</th>`);
                                 jours.forEach(function(jour){
                                     if(trains_jours[jour]==0){
                                         jours_vide.push(jour);
                                     }
-                                    console.log(jour);
-                                    console.log(trains_jours);
                                     $("#affichage_trains table tbody").append(`<td>${trains_jours[jour]}</td>`)
                                 });
                                 chaine_jours_vide="";
-                                console.log(jours_vide);
                                 if(jours_vide.length==0){}
-                                else{
-                                    console.log("Texte affiché.");                                    
+                                else{                                  
                                     if(jours_vide.length==1){
                                         chaine_jours_vide+="le ";
                                     }
@@ -67,7 +63,7 @@
                                             chaine_jours_vide+=", ";
                                         }
                                     });
-                                    $("#affichage_trains").append(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`)
+                                    $("#affichage_trains").append(`<div class="alert alert-danger" role="alert"> Le train n° ${train} ne circule pas ${chaine_jours_vide}</div>`)
                                 }
                             }
                         ,"json"
@@ -76,15 +72,27 @@
                     $("#affichage_trains").slideDown("slow");
                 });                
                 $("#bouton_choix_jour").click(function(){        
-                    jour_choix=$("#jour_a_choisir").val();   
-                    $.post("php_telechargement_donnees.php",
-                        {donnee_choix_jour:jour_choix},
+                    jour_choix=$("#jour_a_choisir").val(); 
+                    $("#affichage_jours").prepend(`<p style="text-align:center;font-weight:bold;"> Voici les trains circulant le ${jour_choix} : </p>`);  
+                    $.post(
+                        "php_telechargement_donnees.php",
+                        {donnee_choix_jour_liste_trains:jour_choix},
                         function(data){
                             console.log(data);
+                            data["liste_trains"].forEach(
+                                function(element_liste_trains){                                    
+                                    $("#tableau_liste_trains").append($("<tr></tr>").html(`<td>${element_liste_trains["Train"]}</td><td>${element_liste_trains["nombre_de_trains"]}</td>`));
+                                }
+                            )
+                        }
+                        ,"json"
+                    );
+                    $.post("php_telechargement_donnees.php",
+                        {donnee_choix_jour_total:jour_choix},
+                        function(data){                     
                             $("#tableau_liste_trains").append(`<th scope="row">${jour_choix}</th>`);
-                            total=data["circulation_jours"];  
-                            console.log(total);                          
-                            $("#tableau_liste_trains").append(`<td>${total[jour_choix]}</td>`);
+                            total=data["circulation_jours"];            
+                            $("#total_semaine").append(`<td>${total[jour_choix]}</td>`);
                         }
                         ,"json"
                     );
@@ -97,7 +105,7 @@
     <body>
         <div class="container" id="questionnaire" style="display:none">
             <p id="titre_de_la_page">Statistiques sur les trains</p>
-            <p></p>Choisissez un jour de la semaine (premier bouton) pour connaître le nombre de trains par semaine ou un train (deuxième bouton) pour connaître la fréquence d'utilisation par semaine .</p>
+            <p>Choisissez un jour de la semaine (premier bouton) pour connaître le nombre de trains par semaine ou un train (deuxième bouton) pour connaître la fréquence d'utilisation par semaine .</p>
             <label for="jour_a_choisir">Sélectionnez votre jour de la semaine: </label>
             <select id="jour_a_choisir" class="form-control">
             </select>
@@ -130,16 +138,15 @@
             <table class="table table-primary">
                 <thead class="thead-dark">
                     <tr>                        
-                        <th scope="col"> Jour de la semaine</th>
+                        <th scope="col"> Numéro de train</th>
                         <th scope="col"> Nombre de trains </th>
                     </tr>
                 </thead>
                 <tbody id="tableau_liste_trains">
                 </tbody>
-                <tbody>
-                    
+                <tbody>                    
                     <tr>
-                        <th scope="col">Total Semaine</th>
+                        <th scope="col">Total</th>
                         <th scope="col" id="total_semaine"></th>
                     </tr>
                 </tbody>

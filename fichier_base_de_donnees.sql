@@ -39,4 +39,4 @@ SELECT
     SUM(table_sncf.Vendredi) AS Vendredi,
     SUM(table_sncf.Samedi) AS Samedi,
     SUM(table_sncf.Dimanche) AS Dimanche
-FROM table_sncf
+FROM table_sncf;
