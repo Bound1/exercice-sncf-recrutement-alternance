@@ -13,9 +13,6 @@
         <title>Statistiques sur les trains</title>
         <script>
             $(document).ready(function(){
-                
-                texte_original_affichage_trains=$("#affichage_trains").html();
-                texte_original_affichage_jours=$("#affichage_jours").html();
                 $("#questionnaire").slideDown("slow");
                 $.post("php_telechargement_donnees.php",                    
                     function(data){
@@ -30,13 +27,13 @@
                     },'json'
                 );
                 $(".retour_accueil").click(function(){
-                    console.log("Affiché");
-                    $("#affichage_trains,#affichage_jours").css({"display":"none"});
-                    $("#affichage_trains").html(texte_original_affichage_trains);
-                    $("#affichage_jours").html(texte_original_affichage_jours);
+                    $("#affichage_trains,#affichage_jours").slideUp();
+                    //$("#affichage_trains").html(texte_original_affichage_trains);
+                    //$("#affichage_jours").html(texte_original_affichage_jours);
                     $("#questionnaire").slideDown();
                 });
                 $("#bouton_choix_train").click(function(){
+                    $("#affichage_trains table tbody").html("");
                     total_graphique=[];
                     train_jours={};
                     train=$("#train_a_choisir").val();
@@ -46,7 +43,7 @@
                         {donnee_choix_train:train},
                             function(data){
                                 trains_jours=data["circulation_trains"];     
-                                $("#affichage_trains").prepend(`<p style="text-align: center;font-weight: bold;">Voici la fréquence du train ${train} : </p>`);                                                            
+                                $("#affichage_trains p").text(`Voici la fréquence du train ${train} :`);                                                            
                                 $("#affichage_trains table tbody").append(`<th scope="row">${train}</th>`);
                                 jours.forEach(function(jour){
                                     if(trains_jours[jour]==0){
@@ -74,9 +71,8 @@
                                         else{
                                             chaine_jours_vide+=", ";
                                         }
-                                    });
-                                    $("#affichage_trains button").after(`<div class="alert alert-danger" role="alert"> Le train n° ${train} ne circule pas ${chaine_jours_vide}</div>`);
-                                    
+                                    });                                    
+                                    $("#trains_ne_circulent_pas").text(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`);
                                 }
                             }
                         ,"json"
@@ -88,14 +84,14 @@
                 });                
                 $("#bouton_choix_jour").click(function(){        
                     jour_choix=$("#jour_a_choisir").val(); 
-                    $("#affichage_jours").prepend(`<p style="text-align:center;font-weight:bold;"> Voici les trains circulant le ${jour_choix} : </p>`);  
+                    $("#affichage_jours p").text(`Voici les trains circulant le ${jour_choix} :`);  
                     $.post(
                         "php_telechargement_donnees.php",
                         {donnee_choix_jour_liste_trains:jour_choix},
                         function(data){
                             data["liste_trains"].forEach(
                                 function(element_liste_trains){                                    
-                                    $("#tableau_liste_trains").append($("<tr></tr>").html(`<td>${element_liste_trains["Train"]}</td><td>${element_liste_trains["nombre_de_trains"]}</td>`));
+                                    $("#tableau_liste_trains").append($(`<tr><td>${element_liste_trains["Train"]}</td><td>${element_liste_trains["nombre_de_trains"]}</td></tr>`));
                                 }
                             )
                         }
@@ -104,17 +100,14 @@
                     $.post("php_telechargement_donnees.php",
                         {donnee_choix_jour_total:jour_choix},
                         function(data){                     
-                            $("#tableau_liste_trains").append(`<th scope="row">${jour_choix}</th>`);
-                            total=data["circulation_jours"];            
+                            total=data["circulation_jours"];       
+                            $("#total_semaine").remove('*');     
                             $("#total_semaine").append(`<td>${total[jour_choix]}</td>`);
                         }
                         ,"json"
                     );
                     $.post("php_telechargement_donnees.php",
                         function(data){
-                            
-                            $("#affichage_jours button").before(`<canvas id="graphique1" width="200px" height="200px"></canvas>`);
-                            $("#affichage_jours button").before(`<canvas id="graphique2" width="200px" height="200px"></canvas>`);
                             total=data["liste_trains_graphique"][0];                     
                             var ctx1 = $("#graphique1")[0].getContext('2d');
                             var ctx2 = $("#graphique2")[0].getContext('2d');
@@ -168,6 +161,7 @@
             <button type="button" id="bouton_choix_train">Choisir</button>
         </div>
         <div class="container" id="affichage_trains" style="display:none">
+            <p scope="row" style="text-align:center;font-weight:bold;"></p>
             <table class="table table-primary">
                 <thead class="thead-dark">
                     <tr>
@@ -184,9 +178,11 @@
                 <tbody>
                 </tbody>
             </table>
+            <div class="alert alert-danger" id="trains_ne_circulent_pas" role="alert" > </div>
             <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
         <div class="container" id="affichage_jours" style="display:none">
+            <p scope="row" style="text-align:center;font-weight:bold;"> </p>
             <table class="table table-primary">
                 <thead class="thead-dark">
                     <tr>                        
@@ -203,6 +199,8 @@
                     </tr>
                 </tbody>
             </table>
+            <canvas id="graphique1" width="200px" height="200px"></canvas>
+            <canvas id="graphique2" width="200px" height="200px"></canvas>
             <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
     </body>
