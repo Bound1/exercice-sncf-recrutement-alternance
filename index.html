@@ -13,8 +13,10 @@
         <title>Statistiques sur les trains</title>
         <script>
             $(document).ready(function(){
+                
+                texte_original_affichage_trains=$("#affichage_trains").html();
+                texte_original_affichage_jours=$("#affichage_jours").html();
                 $("#questionnaire").slideDown("slow");
-                $("#affichage_trains,#affichage_jours").append(`<button class="retour_accueil"> Retourner à l'accueil </button>`);
                 $.post("php_telechargement_donnees.php",                    
                     function(data){
                         trains=data["liste_trains"];
@@ -27,8 +29,13 @@
                         });
                     },'json'
                 );
-                $(".retour_accueil"){
-                    $("#affichage_trains,#affichage_jours").html("");                }
+                $(".retour_accueil").click(function(){
+                    console.log("Affiché");
+                    $("#affichage_trains,#affichage_jours").css({"display":"none"});
+                    $("#affichage_trains").html(texte_original_affichage_trains);
+                    $("#affichage_jours").html(texte_original_affichage_jours);
+                    $("#questionnaire").slideDown();
+                });
                 $("#bouton_choix_train").click(function(){
                     total_graphique=[];
                     train_jours={};
@@ -45,7 +52,7 @@
                                     if(trains_jours[jour]==0){
                                         jours_vide.push(jour);
                                     }
-                                    $("#affichage_trains table tbody").append(`<td>${trains_jours[jour]}</td>`)
+                                    $("#affichage_trains table tbody").append(`<td>${trains_jours[jour]}</td>`);
                                 });
                                 chaine_jours_vide="";
                                 if(jours_vide.length==0){}
@@ -68,7 +75,7 @@
                                             chaine_jours_vide+=", ";
                                         }
                                     });
-                                    $("#affichage_trains").append(`<div class="alert alert-danger" role="alert"> Le train n° ${train} ne circule pas ${chaine_jours_vide}</div>`);
+                                    $("#affichage_trains button").after(`<div class="alert alert-danger" role="alert"> Le train n° ${train} ne circule pas ${chaine_jours_vide}</div>`);
                                     
                                 }
                             }
@@ -86,7 +93,6 @@
                         "php_telechargement_donnees.php",
                         {donnee_choix_jour_liste_trains:jour_choix},
                         function(data){
-                            console.log(data);
                             data["liste_trains"].forEach(
                                 function(element_liste_trains){                                    
                                     $("#tableau_liste_trains").append($("<tr></tr>").html(`<td>${element_liste_trains["Train"]}</td><td>${element_liste_trains["nombre_de_trains"]}</td>`));
@@ -101,17 +107,15 @@
                             $("#tableau_liste_trains").append(`<th scope="row">${jour_choix}</th>`);
                             total=data["circulation_jours"];            
                             $("#total_semaine").append(`<td>${total[jour_choix]}</td>`);
-                            console.log(total);
                         }
                         ,"json"
                     );
                     $.post("php_telechargement_donnees.php",
                         function(data){
                             
-                            $("#affichage_jours").append(`<canvas id="graphique1" width="200px" height="200px"></canvas>`);
-                            $("#affichage_jours").append(`<canvas id="graphique2" width="200px" height="200px"></canvas>`);
-                            total=data["liste_trains_graphique"][0];
-                            console.log(data);                            
+                            $("#affichage_jours button").before(`<canvas id="graphique1" width="200px" height="200px"></canvas>`);
+                            $("#affichage_jours button").before(`<canvas id="graphique2" width="200px" height="200px"></canvas>`);
+                            total=data["liste_trains_graphique"][0];                     
                             var ctx1 = $("#graphique1")[0].getContext('2d');
                             var ctx2 = $("#graphique2")[0].getContext('2d');
                             // création du graphique
@@ -122,7 +126,8 @@
                                     labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi','Dimanche'],
                                     datasets: [{
                                                 label: 'Répartition des trains par semaine',
-                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])]
+                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])],
+                                                backgroundColor: ['#ff6550','#ab25ca','#ffb300','#ef57ac','#bca457','#a56d6c','cda9dc','bcdfe5']
                                             }]
                                 }
                                 });
@@ -133,7 +138,8 @@
                                     labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi','Dimanche'],
                                     datasets: [{
                                                 label: 'Répartition des trains par semaine',
-                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])]
+                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])],
+                                                backgroundColor: ['#ff6550','#ab25ca','#ffb300','#ef57ac','#bca457','#a56d6c','cda9dc','bcdfe5']
                                             }]
                                 }
                                 });
@@ -178,6 +184,7 @@
                 <tbody>
                 </tbody>
             </table>
+            <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
         <div class="container" id="affichage_jours" style="display:none">
             <table class="table table-primary">
@@ -196,6 +203,7 @@
                     </tr>
                 </tbody>
             </table>
+            <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
     </body>
 </html>
