@@ -23,6 +23,7 @@ $donnees_json=["liste_trains"=>$trains,"liste_jours"=>$jours];
 $circulation_trains=null;
 $circulation_jours=null;
 $liste_trains=[];
+$liste_trains_graphique=[];
 if (isset($donnee_train)){    
     $resultat_requete_circulation_trains=mysqli_query($connexion,"SELECT Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche FROM circulation_jour_de_la_semaine_pour_chaque_train WHERE Train='".$donnee_train."'");
     while ($row = mysqli_fetch_assoc($resultat_requete_circulation_trains)) {
@@ -39,7 +40,13 @@ if (isset($donnee_train)){
     $donnees_json["circulation_trains"]=$circulation_trains;
     $donnees_json["circulation_jours"]=$circulation_jours;
     $donnees_json["liste_trains"]=$liste_trains;
+    
 }
+$resultat_requete_graphique_trains=mysqli_query($connexion,"SELECT Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche FROM nombre_total_trains");
+while($row = mysqli_fetch_assoc($resultat_requete_graphique_trains)){
+    array_push($liste_trains_graphique,$row);
+}
+$donnees_json["liste_trains_graphique"]=$liste_trains_graphique;
 echo json_encode($donnees_json);
 mysqli_close($connexion);
 ?>

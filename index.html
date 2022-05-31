@@ -8,11 +8,13 @@
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.0/chart.min.js"></script>
         <meta charset="utf-8">
         <title>Statistiques sur les trains</title>
         <script>
             $(document).ready(function(){
                 $("#questionnaire").slideDown("slow");
+                $("#affichage_trains,#affichage_jours").append(`<button class="retour_accueil"> Retourner à l'accueil </button>`);
                 $.post("php_telechargement_donnees.php",                    
                     function(data){
                         trains=data["liste_trains"];
@@ -25,7 +27,10 @@
                         });
                     },'json'
                 );
+                $(".retour_accueil"){
+                    $("#affichage_trains,#affichage_jours").html("");                }
                 $("#bouton_choix_train").click(function(){
+                    total_graphique=[];
                     train_jours={};
                     train=$("#train_a_choisir").val();
                     jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -63,11 +68,14 @@
                                             chaine_jours_vide+=", ";
                                         }
                                     });
-                                    $("#affichage_trains").append(`<div class="alert alert-danger" role="alert"> Le train n° ${train} ne circule pas ${chaine_jours_vide}</div>`)
+                                    $("#affichage_trains").append(`<div class="alert alert-danger" role="alert"> Le train n° ${train} ne circule pas ${chaine_jours_vide}</div>`);
+                                    
                                 }
                             }
                         ,"json"
                     );
+                    
+
                     $("#questionnaire").slideUp("slow");
                     $("#affichage_trains").slideDown("slow");
                 });                
@@ -93,9 +101,46 @@
                             $("#tableau_liste_trains").append(`<th scope="row">${jour_choix}</th>`);
                             total=data["circulation_jours"];            
                             $("#total_semaine").append(`<td>${total[jour_choix]}</td>`);
+                            console.log(total);
                         }
                         ,"json"
                     );
+                    $.post("php_telechargement_donnees.php",
+                        function(data){
+                            
+                            $("#affichage_jours").append(`<canvas id="graphique1" width="200px" height="200px"></canvas>`);
+                            $("#affichage_jours").append(`<canvas id="graphique2" width="200px" height="200px"></canvas>`);
+                            total=data["liste_trains_graphique"][0];
+                            console.log(data);                            
+                            var ctx1 = $("#graphique1")[0].getContext('2d');
+                            var ctx2 = $("#graphique2")[0].getContext('2d');
+                            // création du graphique
+                            var myChart = new Chart(ctx1, {
+                                //type: 'bar',   // le type du graphique
+                                type:'bar',
+                                data: {        // les données
+                                    labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi','Dimanche'],
+                                    datasets: [{
+                                                label: 'Répartition des trains par semaine',
+                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])]
+                                            }]
+                                }
+                                });
+                                var myChart = new Chart(ctx2, {
+                                //type: 'bar',   // le type du graphique
+                                type:'pie',
+                                data: {        // les données
+                                    labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi','Dimanche'],
+                                    datasets: [{
+                                                label: 'Répartition des trains par semaine',
+                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])]
+                                            }]
+                                }
+                                });
+                        }
+                        ,"json"
+                    );
+                    // l'identifiant est celui du canevas
                     $("#questionnaire").slideUp("slow");
                     $("#affichage_jours").slideDown("slow");
                 });
