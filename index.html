@@ -3,205 +3,49 @@
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <link rel="stylesheet" href="index.css">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" 
         integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" 
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.0/chart.min.js"></script>
         <meta charset="utf-8">
-        <title>Statistiques sur les trains</title>
-        <script>
-            $(document).ready(function(){
-                $("#questionnaire").slideDown("slow");
-                $.post("php_telechargement_donnees.php",                    
-                    function(data){
-                        trains=data["liste_trains"];
-                        trains.forEach(function(train){
-                            $("#train_a_choisir").append(`<option value="${train}">${train}</option>`);
-                        });                        
-                        jours=data["liste_jours"];
-                        jours.forEach(function(jour){
-                            $("#jour_a_choisir").append(`<option value="${jour}">${jour}</option>`);
-                        });
-                    },'json'
-                );
-                $(".retour_accueil").click(function(){
-                    $("#affichage_trains,#affichage_jours").slideUp();
-                    //$("#affichage_trains").html(texte_original_affichage_trains);
-                    //$("#affichage_jours").html(texte_original_affichage_jours);
-                    $("#questionnaire").slideDown();
-                });
-                $("#bouton_choix_train").click(function(){
-                    $("#affichage_trains table tbody").html("");
-                    total_graphique=[];
-                    train_jours={};
-                    train=$("#train_a_choisir").val();
-                    jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
-                    jours_vide=[];
-                    $.post("php_telechargement_donnees.php",       
-                        {donnee_choix_train:train},
-                            function(data){
-                                trains_jours=data["circulation_trains"];     
-                                $("#affichage_trains p").text(`Voici la fréquence du train ${train} :`);                                                            
-                                $("#affichage_trains table tbody").append(`<th scope="row">${train}</th>`);
-                                jours.forEach(function(jour){
-                                    if(trains_jours[jour]==0){
-                                        jours_vide.push(jour);
-                                    }
-                                    $("#affichage_trains table tbody").append(`<td>${trains_jours[jour]}</td>`);
-                                });
-                                chaine_jours_vide="";
-                                if(jours_vide.length==0){}
-                                else{                                  
-                                    if(jours_vide.length==1){
-                                        chaine_jours_vide+="le ";
-                                    }
-                                    else{
-                                        chaine_jours_vide+="les ";
-                                    }
-                                    jours_vide.forEach(function(jour,index,array){
-                                        chaine_jours_vide+=jour;
-                                        if(index==array.length-1){
-                                            chaine_jours_vide+=".";
-                                        }
-                                        else if(index==array.length-2){
-                                            chaine_jours_vide+=" et ";
-                                        }
-                                        else{
-                                            chaine_jours_vide+=", ";
-                                        }
-                                    });                                    
-                                    $("#trains_ne_circulent_pas").text(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`);
-                                }
-                            }
-                        ,"json"
-                    );
-                    
-
-                    $("#questionnaire").slideUp("slow");
-                    $("#affichage_trains").slideDown("slow");
-                });                
-                $("#bouton_choix_jour").click(function(){        
-                    jour_choix=$("#jour_a_choisir").val(); 
-                    $("#affichage_jours p").text(`Voici les trains circulant le ${jour_choix} :`);  
-                    $.post(
-                        "php_telechargement_donnees.php",
-                        {donnee_choix_jour_liste_trains:jour_choix},
-                        function(data){
-                            data["liste_trains"].forEach(
-                                function(element_liste_trains){                                    
-                                    $("#tableau_liste_trains").append($(`<tr><td>${element_liste_trains["Train"]}</td><td>${element_liste_trains["nombre_de_trains"]}</td></tr>`));
-                                }
-                            )
-                        }
-                        ,"json"
-                    );
-                    $.post("php_telechargement_donnees.php",
-                        {donnee_choix_jour_total:jour_choix},
-                        function(data){                     
-                            total=data["circulation_jours"];       
-                            $("#total_semaine").remove('*');     
-                            $("#total_semaine").append(`<td>${total[jour_choix]}</td>`);
-                        }
-                        ,"json"
-                    );
-                    $.post("php_telechargement_donnees.php",
-                        function(data){
-                            total=data["liste_trains_graphique"][0];                     
-                            var ctx1 = $("#graphique1")[0].getContext('2d');
-                            var ctx2 = $("#graphique2")[0].getContext('2d');
-                            // création du graphique
-                            var myChart = new Chart(ctx1, {
-                                //type: 'bar',   // le type du graphique
-                                type:'bar',
-                                data: {        // les données
-                                    labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi','Dimanche'],
-                                    datasets: [{
-                                                label: 'Répartition des trains par semaine',
-                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])],
-                                                backgroundColor: ['#ff6550','#ab25ca','#ffb300','#ef57ac','#bca457','#a56d6c','cda9dc','bcdfe5']
-                                            }]
-                                }
-                                });
-                                var myChart = new Chart(ctx2, {
-                                //type: 'bar',   // le type du graphique
-                                type:'pie',
-                                data: {        // les données
-                                    labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi','Dimanche'],
-                                    datasets: [{
-                                                label: 'Répartition des trains par semaine',
-                                                data: [parseInt(total['Lundi']),parseInt(total['Mardi']),parseInt(total['Mercredi']),parseInt(total['Jeudi']),parseInt(total['Vendredi']),parseInt(total['Samedi']),parseInt(total['Dimanche'])],
-                                                backgroundColor: ['#ff6550','#ab25ca','#ffb300','#ef57ac','#bca457','#a56d6c','cda9dc','bcdfe5']
-                                            }]
-                                }
-                                });
-                        }
-                        ,"json"
-                    );
-                    // l'identifiant est celui du canevas
-                    $("#questionnaire").slideUp("slow");
-                    $("#affichage_jours").slideDown("slow");
-                });
-            });
-        </script>
+        <title>Modification de la base de données sur les trains.</title>
     </head>
     <body>
-        <div class="container" id="questionnaire" style="display:none">
-            <p id="titre_de_la_page">Statistiques sur les trains</p>
-            <p>Choisissez un jour de la semaine (premier bouton) pour connaître le nombre de trains par semaine ou un train (deuxième bouton) pour connaître la fréquence d'utilisation par semaine .</p>
-            <label for="jour_a_choisir">Sélectionnez votre jour de la semaine: </label>
-            <select id="jour_a_choisir" class="form-control">
-            </select>
-            <button type="button" id="bouton_choix_jour">Choisir</button>
+        <form>            
+            <div class="form-group">
+                <button>Ajouter nouveau train</button><br>
+                <button>Modifier train</button><br>
+                <button>Supprimer train</button>
+            </div>
+        </form>
+        <div id="formulaire_train">
+            <label for="date_debut">Date de début</label>
+            <input id="date_debut" type="datetime" value="2022-01-31">
+            <label for="date_fin">Date de fin</label>
+            <input id="date_fin" type="datetime" value="2022-07-02">
+            <label for="train">Train</label>
+            <input id="train" type="text">
             <br>
-            <label for="train_a_choisir">Sélectionnez votre train: </label>
-            <select id="train_a_choisir" class="form-control">
-            </select>
-            <button type="button" id="bouton_choix_train">Choisir</button>
-        </div>
-        <div class="container" id="affichage_trains" style="display:none">
-            <p scope="row" style="text-align:center;font-weight:bold;"></p>
-            <table class="table table-primary">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col"> Train</th>
-                        <th scope="col"> Lundi </th>
-                        <th scope="col"> Mardi </th>
-                        <th scope="col"> Mercredi </th>
-                        <th scope="col"> Jeudi </th>
-                        <th scope="col"> Vendredi </th>
-                        <th scope="col"> Samedi </th>
-                        <th scope="col"> Dimanche </th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
+            <table>
+                <tr>          
+                    <td><label for="Lundi">Lundi&nbsp;</label></td>
+                    <td><label for="Mardi">Mardi&nbsp;</label></td>
+                    <td><label for="Mercredi">Mercredi&nbsp;</label></td>
+                    <td><label for="Jeudi">Jeudi&nbsp;</label></td>
+                    <td><label for="Vendredi">Vendredi&nbsp;</label></td>
+                    <td><label for="Samedi">Samedi&nbsp;</label></td>
+                    <td><label for="Dimanche">Dimanche&nbsp;</label></td>
+                </tr>
+                <tr style="text-align:center">
+                    <td><input id="Lundi" type="checkbox"></td>
+                    <td><input id="Mardi" type="checkbox"></td>
+                    <td><input id="Mercredi" type="checkbox"></td>
+                    <td><input id="Jeudi" type="checkbox"></td>
+                    <td><input id="Vendredi" type="checkbox"></td>
+                    <td><input id="Samedi" type="checkbox"></td>
+                    <td><input id="Dimanche" type="checkbox"></td>
+                </tr>
             </table>
-            <div class="alert alert-danger" id="trains_ne_circulent_pas" role="alert" > </div>
-            <button class="retour_accueil"> Retourner à l'accueil </button>
-        </div>
-        <div class="container" id="affichage_jours" style="display:none">
-            <p scope="row" style="text-align:center;font-weight:bold;"> </p>
-            <table class="table table-primary">
-                <thead class="thead-dark">
-                    <tr>                        
-                        <th scope="col"> Numéro de train</th>
-                        <th scope="col"> Nombre de trains </th>
-                    </tr>
-                </thead>
-                <tbody id="tableau_liste_trains">
-                </tbody>
-                <tbody>                    
-                    <tr>
-                        <th scope="col">Total</th>
-                        <th scope="col" id="total_semaine"></th>
-                    </tr>
-                </tbody>
-            </table>
-            <canvas id="graphique1" width="200px" height="200px"></canvas>
-            <canvas id="graphique2" width="200px" height="200px"></canvas>
-            <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
     </body>
 </html>
