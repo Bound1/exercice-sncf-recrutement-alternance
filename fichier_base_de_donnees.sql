@@ -13,10 +13,11 @@ CREATE TABLE IF NOT exists `table_sncf`
     Jeudi TINYINT,
 	Vendredi TINYINT,
     Samedi TINYINT,
-    Dimanche TINYINT
+    Dimanche TINYINT,
+    id INT primary key NOT NULL AUTO_INCREMENT
 );
 LOAD DATA INFILE 'C:\\Users\\Boubacar Pelage\\Documents\\test alternance sncf\\tableau MUST hiver 2022 V1.csv' INTO table `table_sncf`
-FIELDS terminated by ';' LINES terminated by '\r\n' IGNORE 1 LINES;
+FIELDS terminated by ';' LINES terminated by '\r\n' IGNORE 1 LINES SET id=NULL;
 -- Remplacer 'C:\\Users\\Boubacar Pelage\\Documents\\test alternance sncf\\tableau MUST hiver 2022 V1.csv'
 -- par le  chemin d'accès de votre fichier CSV
 create OR REPLACE VIEW circulation_jour_de_la_semaine_pour_chaque_train AS
