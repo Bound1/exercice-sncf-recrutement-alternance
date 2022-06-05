@@ -15,7 +15,14 @@
                         entier_jour=$(`#${jour}`).is(':checked')?1:0;
                         tableau_jour_semaine[jour]=entier_jour;
                     });
-                    console.log(tableau_jour_semaine);
+                    $.post("php_telechargement_donnees.php",
+                    {"date_debut":$("#date_debut").val(), 
+                    "date_fin":$("#date_fin").val(),
+                    "train":$("#train").val(),
+                    "tableau_jour_semaine":tableau_jour_semaine, "mode":"ajout"},
+                    function(data){
+                        console.log(data);
+                    });
                 });
             });
         </script>
