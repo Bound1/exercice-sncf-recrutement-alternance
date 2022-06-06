@@ -14,7 +14,7 @@
         <script>
             $(document).ready(function(){
                 $("#questionnaire").slideDown("slow");
-                $.post("php_telechargement_donnees.php",                    
+                $.post("php_telechargement_donnees_old.php",                    
                     function(data){
                         trains=data["liste_trains"];
                         trains.forEach(function(train){
@@ -39,7 +39,7 @@
                     train=$("#train_a_choisir").val();
                     jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
                     jours_vide=[];
-                    $.post("php_telechargement_donnees.php",       
+                    $.post("php_telechargement_donnees_old.php",       
                         {donnee_choix_train:train},
                             function(data){
                                 trains_jours=data["circulation_trains"];     
@@ -86,7 +86,7 @@
                     jour_choix=$("#jour_a_choisir").val(); 
                     $("#affichage_jours p").text(`Voici les trains circulant le ${jour_choix} :`);  
                     $.post(
-                        "php_telechargement_donnees.php",
+                        "php_telechargement_donnees_old.php",
                         {donnee_choix_jour_liste_trains:jour_choix},
                         function(data){
                             data["liste_trains"].forEach(
@@ -97,7 +97,7 @@
                         }
                         ,"json"
                     );
-                    $.post("php_telechargement_donnees.php",
+                    $.post("php_telechargement_donnees_old.php",
                         {donnee_choix_jour_total:jour_choix},
                         function(data){                     
                             total=data["circulation_jours"];       
@@ -106,7 +106,7 @@
                         }
                         ,"json"
                     );
-                    $.post("php_telechargement_donnees.php",
+                    $.post("php_telechargement_donnees_old.php",
                         function(data){
                             total=data["liste_trains_graphique"][0];                     
                             var ctx1 = $("#graphique1")[0].getContext('2d');

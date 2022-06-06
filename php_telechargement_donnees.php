@@ -29,15 +29,7 @@ if(isset($_POST["mode"]) && $_POST["mode"]=="ajout"){
     }
     $tableau_jour_semaine=$_POST["tableau_jour_semaine"];    
     $connexion= mysqli_connect($nom_serveur,$nom_utilisateur,$mot_de_passe,$base_de_donnees);
-    try{
-        
     $resultat_requete_liste_trains=mysqli_query($connexion,transformer_tableau_en_requete());
-    }
-    catch(mysqli_sql_exception $e){
-        echo $e."\n";
-        die(transformer_tableau_en_requete());
-    }
     mysqli_close($connexion);
 }
-
 ?>
