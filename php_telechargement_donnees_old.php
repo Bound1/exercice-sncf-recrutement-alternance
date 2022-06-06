@@ -14,7 +14,7 @@ if(isset($_POST["donnee_choix_jour_liste_trains"])){
 }
 $connexion= mysqli_connect($nom_serveur,$nom_utilisateur,$mot_de_passe,$base_de_donnees);
 $jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
-$resultat_requete_liste_trains=mysqli_query($connexion,"SELECT Train FROM table_sncf ORDER BY Train");
+$resultat_requete_liste_trains=mysqli_query($connexion,"SELECT DISTINCT Train FROM table_sncf ORDER BY Train");
 $trains=[];
 while ($row = mysqli_fetch_assoc($resultat_requete_liste_trains)) {
     array_push($trains,$row["Train"]);
@@ -33,7 +33,10 @@ if (isset($donnee_train)){
     while ($row = mysqli_fetch_assoc($resultat_requete_circulation_jours)) {
         $circulation_jours=$row;
     }
+    
     $resultat_requete_choix_jour_liste_trains=mysqli_query($connexion,"SELECT jour.Train,SUM(jour.$donnee_train) AS nombre_de_trains FROM (SELECT Train, $donnee_train FROM circulation_jour_de_la_semaine_pour_chaque_train WHERE $donnee_train!=0) AS jour GROUP BY jour.Train;");
+    
+    
     while($row = mysqli_fetch_assoc($resultat_requete_choix_jour_liste_trains)){
         array_push($liste_trains,$row);
     }

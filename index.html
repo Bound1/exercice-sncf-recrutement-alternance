@@ -13,7 +13,7 @@
         <script>
             $(document).ready(function(){                
                 $("#questionnaire").slideDown("slow");
-                $.post("php_telechargement_donnees_old.php",                    
+                $.post("php_telechargement_donnees.php", {mode:"old"},                   
                     function(data){
                         trains=data["liste_trains"];
                         trains.forEach(function(train){
@@ -27,29 +27,33 @@
                 );
                 $(".retour_accueil").click(function(){
                     $("#affichage_trains,#affichage_jours").slideUp();
-                    //$("#affichage_trains").html(texte_original_affichage_trains);
-                    //$("#affichage_jours").html(texte_original_affichage_jours);
                     $("#questionnaire").slideDown();
                 });
                 $("#bouton_choix_train").click(function(){
                     $("#corps_tableau_affichage_trains").html("");
                     total_graphique=[];
-                    train_jours={};
+                    trains_jours={};
                     train=$("#train_a_choisir").val();
                     jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
                     jours_vide=[];
-                    $.post("php_telechargement_donnees_old.php",       
-                        {donnee_choix_train:train},
+                    $.post("php_telechargement_donnees.php",       
+                        {donnee_choix_train:train,mode:"old"},
                             function(data){
-                                trains_jours=data["circulation_trains"];     
-                                $("#affichage_trains p").text(`Voici la fréquence du train ${train} :`);                                                            
-                                $("#corps_tableau_affichage_trains").append(`<th scope="row">${train}</th>`);
-                                jours.forEach(function(jour){
-                                    if(trains_jours[jour]==0){
-                                        jours_vide.push(jour);
-                                    }
-                                    $("#corps_tableau_affichage_trains").append(`<td>${trains_jours[jour]}</td>`);
-                                });
+                                trains_jours=data["circulation_trains"]; 
+                                $("#voici_frequence").text(`Voici la fréquence du train ${train} :`);
+                                html=''; 
+                                trains_jours.forEach(function(element_bdd){
+                                    html+='<tr>'; 
+                                    html+=`<th scope="row">${element_bdd["Train"]}</th>`;                                            
+                                    jours.forEach(function(jour){
+                                        if(element_bdd[jour]==0){
+                                            jours_vide.push(jour);
+                                        }
+                                       html+=`<td>${element_bdd[jour]}</td>`;  
+                                    });
+                                    html+="</tr>";
+                                });                                
+                                $("#corps_tableau_affichage_trains").append(`${html}`);  
                                 chaine_jours_vide="";
                                 if(jours_vide.length==0){}
                                 else{                                  
@@ -70,16 +74,19 @@
                                         else{
                                             chaine_jours_vide+=", ";
                                         }
-                                    });                                    
+                                    });                               
                                     $("#trains_ne_circulent_pas").text(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`);
                                     $("#train").val(train);
                                     jours.forEach(function(jour){
-                                        if(trains_jours[jour]==1){                                            
+                                        console.log(trains_jours[0]);
+                                        if(trains_jours[0][jour]!=0){                                            
                                             $(`#${jour}`).prop("checked",true);
                                         }
+                                        else{
+                                            $(`#${jour}`).prop("checked",false);
+                                        }
                                     });
-                                }
-                            }
+                                }}
                         ,"json"
                     );               
                     $("#questionnaire").slideUp("slow");
@@ -89,8 +96,8 @@
                     jour_choix=$("#jour_a_choisir").val(); 
                     $("#affichage_jours p").text(`Voici les trains circulant le ${jour_choix} :`);  
                     $.post(
-                        "php_telechargement_donnees_old.php",
-                        {donnee_choix_jour_liste_trains:jour_choix},
+                        "php_telechargement_donnees.php",
+                        {donnee_choix_jour_liste_trains:jour_choix,mode:"old"},
                         function(data){
                             data["liste_trains"].forEach(
                                 function(element_liste_trains){                                    
@@ -100,8 +107,8 @@
                         }
                         ,"json"
                     );
-                    $.post("php_telechargement_donnees_old.php",
-                        {donnee_choix_jour_total:jour_choix},
+                    $.post("php_telechargement_donnees.php",
+                        {donnee_choix_jour_total:jour_choix,mode:"old"},
                         function(data){                     
                             total=data["circulation_jours"];       
                             $("#total_semaine").remove('*');     
@@ -109,7 +116,7 @@
                         }
                         ,"json"
                     );
-                    $.post("php_telechargement_donnees_old.php",
+                    $.post("php_telechargement_donnees.php",{mode:"old"},
                         function(data){
                             total=data["liste_trains_graphique"][0];                     
                             var ctx1 = $("#graphique1")[0].getContext('2d');
@@ -157,16 +164,12 @@
                     {"date_debut":$("#date_debut").val(), 
                     "date_fin":$("#date_fin").val(),
                     "train":$("#train").val(),
-                    "tableau_jour_semaine":tableau_jour_semaine, "mode":"ajout"},
-                    function(data){
-                        console.log(data);
-                    });
+                    "tableau_jour_semaine":tableau_jour_semaine, "mode":"ajout"});
                 });
             });
         </script>
     </head>
     <body>
-        
         <div class="container" id="questionnaire" style="display:none">
             <p id="titre_de_la_page">Statistiques sur les trains</p>
             <p>Choisissez un jour de la semaine (premier bouton) pour connaître le nombre de trains par semaine ou un train (deuxième bouton) pour connaître la fréquence d'utilisation par semaine .</p>
@@ -181,7 +184,7 @@
             <button type="button" id="bouton_choix_train">Choisir</button>
         </div>
         <div class="container" id="affichage_trains" style="display:none">
-            <p scope="row" style="text-align:center;font-weight:bold;"></p>
+            <p id="voici_frequence" scope="row" style="text-align:center;font-weight:bold;"></p>
             <table class="table table-primary">
                 <thead class="thead-dark">
                     <tr>
@@ -198,7 +201,10 @@
                 <tbody id="corps_tableau_affichage_trains">
                 </tbody>
             </table>
+            
+            <p>Si plusieurs trains, veuillez cliquer sur le train à modifier ou à supprimer.</p><br>
             <button id="ajout_train">Ajouter nouveau train</button><br>
+            
         <button id="modifier_train">Modifier train</button><br>
         <button id="supprimer_train">Supprimer train</button>
         <div id="formulaire_train">
