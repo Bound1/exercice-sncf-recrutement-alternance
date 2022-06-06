@@ -82,4 +82,22 @@ if(isset($_POST["mode"]) && $_POST["mode"]=="ajout"){
     $resultat_requete_liste_trains=mysqli_query($connexion,transformer_tableau_en_requete());
     mysqli_close($connexion);
 }
+if(isset($_POST["mode"]) && $_POST["mode"]=="modifier"){
+    $donnees_recuperes=$_POST["donnees"];
+    $Date_deb=$donnees_recuperes["Date_deb"];
+    $Date_fin=$donnees_recuperes["Date_fin"];
+    $Train=$donnees_recuperes["train"];
+    $Lundi=$donnees_recuperes["Lundi"];
+    $Mardi=$donnees_recuperes["Mardi"];
+    $Mercredi=$donnees_recuperes["Mercredi"];
+    $Jeudi=$donnees_recuperes["Jeudi"];
+    $Vendredi=$donnees_recuperes["Vendredi"];
+    $Samedi=$donnees_recuperes["Samedi"];
+    $Dimanche=$donnees_recuperes["Dimanche"];
+    $id=$_POST["id"];
+    $requete="REPLACE INTO table_sncf VALUES ('$Date_deb','$Date_fin','$Train','$Lundi','$Mardi','$Mercredi','$Jeudi','$Vendredi','$Samedi','$Dimanche','$id')";
+    echo $requete;
+    $connexion= mysqli_connect($nom_serveur,$nom_utilisateur,$mot_de_passe,$base_de_donnees);
+    $resultat_requete_liste_trains=mysqli_query($connexion,$requete);
+}
 ?>

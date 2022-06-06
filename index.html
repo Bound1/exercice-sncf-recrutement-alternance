@@ -11,7 +11,8 @@
         <meta charset="utf-8">
         <title>Modification de la base de données sur les trains.</title>
         <script>
-            $(document).ready(function(){                
+            $(document).ready(function(){ 
+                id_selectionne=undefined;               
                 $("#questionnaire").slideDown("slow");
                 $.post("php_telechargement_donnees.php", {mode:"old"},                   
                     function(data){
@@ -32,6 +33,7 @@
                 $("#bouton_choix_train").click(function(){
                     $("#corps_tableau_affichage_trains").html("");
                     total_graphique=[];
+                    tableau_trains_affiche_ids=[];
                     trains_jours={};
                     train=$("#train_a_choisir").val();
                     jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -44,7 +46,7 @@
                                 html=''; 
                                 trains_jours.forEach(function(element_bdd){
                                     html+='<tr>'; 
-                                    html+=`<th scope="row">${element_bdd["Train"]}</th>`;                                            
+                                    html+=`<th scope="row" id="train_numero_${element_bdd["id"]}">${element_bdd["Train"]}</th>`;                                            
                                     jours.forEach(function(jour){
                                         if(element_bdd[jour]==0){
                                             jours_vide.push(jour);
@@ -52,8 +54,24 @@
                                        html+=`<td>${element_bdd[jour]}</td>`;  
                                     });
                                     html+="</tr>";
-                                });                                
-                                $("#corps_tableau_affichage_trains").append(`${html}`);  
+                                    tableau_trains_affiche_ids.push(element_bdd["id"]);
+                                });     
+                                id_selectionne=tableau_trains_affiche_ids[0];                          
+                                $("#corps_tableau_affichage_trains").append(`${html}`).on("click","[id^='train_numero_']",function(){ // id commence par "train_numero_"
+                                    id=$(this).attr("id").slice(13);
+                                    id_selectionne=id;
+                                    console.log(id_selectionne);
+                                    jours.forEach(function(jour){
+                                        index=tableau_trains_affiche_ids.findIndex((element) => element==id);
+                                        console.log(index);
+                                        if(trains_jours[index][jour]!=0){                                            
+                                            $(`#${jour}`).prop("checked",true);
+                                        }
+                                        else{
+                                            $(`#${jour}`).prop("checked",false);
+                                        }
+                                    });
+                                });  
                                 chaine_jours_vide="";
                                 if(jours_vide.length==0){}
                                 else{                                  
@@ -78,7 +96,6 @@
                                     $("#trains_ne_circulent_pas").text(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`);
                                     $("#train").val(train);
                                     jours.forEach(function(jour){
-                                        console.log(trains_jours[0]);
                                         if(trains_jours[0][jour]!=0){                                            
                                             $(`#${jour}`).prop("checked",true);
                                         }
@@ -88,10 +105,31 @@
                                     });
                                 }}
                         ,"json"
-                    );               
+                    );     
                     $("#questionnaire").slideUp("slow");
                     $("#affichage_trains").slideDown("slow");
-                });                
+                });
+                $("#modifier_train").click(function(){
+                    donnees_a_recuperer=["Date_deb","Date_fin","train","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+                    donnees_recuperees={};
+                    donnees_a_recuperer.forEach(function(donnee){
+                        $valeur=$(`#${donnee}`).val();
+                        if($(`#${donnee}`).attr("type")=="checkbox" && $(`#${donnee}`).is(":checked")){
+                            donnees_recuperees[donnee]=1;
+                        }
+                        else if($(`#${donnee}`).attr("type")=="checkbox"){
+                            donnees_recuperees[donnee]=0;
+                        }
+                        else{
+                            donnees_recuperees[donnee]=$valeur;
+                        }
+                    });
+                    console.log(donnees_recuperees);
+                    $.post("php_telechargement_donnees.php",{mode:"modifier",id:id_selectionne,donnees:donnees_recuperees},function(data){
+                        console.log(data)
+                        alert("La base de données a été modifié");
+                    });
+                });               
                 $("#bouton_choix_jour").click(function(){        
                     jour_choix=$("#jour_a_choisir").val(); 
                     $("#affichage_jours p").text(`Voici les trains circulant le ${jour_choix} :`);  
@@ -161,8 +199,8 @@
                         tableau_jour_semaine[jour]=entier_jour;
                     });
                     $.post("php_telechargement_donnees.php",
-                    {"date_debut":$("#date_debut").val(), 
-                    "date_fin":$("#date_fin").val(),
+                    {"Date_deb":$("#Date_deb").val(), 
+                    "Date_fin":$("#Date_fin").val(),
                     "train":$("#train").val(),
                     "tableau_jour_semaine":tableau_jour_semaine, "mode":"ajout"});
                 });
@@ -208,10 +246,10 @@
         <button id="modifier_train">Modifier train</button><br>
         <button id="supprimer_train">Supprimer train</button>
         <div id="formulaire_train">
-            <label for="date_debut">Date de début</label>
-            <input id="date_debut" type="date" value="2022-01-31">
-            <label for="date_fin">Date de fin</label>
-            <input id="date_fin" type="date" value="2022-07-02">
+            <label for="Date_deb">Date de début</label>
+            <input id="Date_deb" type="date" value="2022-01-31">
+            <label for="Date_fin">Date de fin</label>
+            <input id="Date_fin" type="date" value="2022-07-02">
             <label for="train">Train n°</label>
             <input id="train" type="text">
             <br>
