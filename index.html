@@ -154,13 +154,13 @@
                         }
                     });
                     $.post("php_telechargement_donnees.php",{mode:"modifier",id:id_selectionne,donnees:donnees_recuperees},function(data){
-                        alert("La base de données a été modifié.");
                     });
                 });
                 $("#supprimer_train").click(function(){
-                    $.post("php_telechargement_donnees.php",{mode:"supprimer",id:id_selectionne},function(data){
-                        alert("Le train a été supprimé.");
-                    });
+                    if(confirm("Voulez-vous vraimer supprimer ce train ?")){                        
+                        $.post("php_telechargement_donnees.php",{mode:"supprimer",id:id_selectionne},function(data){
+                        });
+                    }
                 });               
                 $("#bouton_choix_jour").click(function(){        
                     jour_choix=$("#jour_a_choisir").val(); 
@@ -251,7 +251,8 @@
             <label for="train_a_choisir">Sélectionnez votre train: </label>
             <select id="train_a_choisir" class="form-control">
             </select>
-            <button type="button" id="bouton_choix_train">Choisir</button>
+            <button type="button" id="bouton_choix_train">Choisir</button><br>
+            <button type="button" id="bouton_saisir_train">Saisir nouveau train</button>
         </div>
         <div class="container" id="affichage_trains" style="display:none">
             <p id="voici_frequence" scope="row" style="text-align:center;font-weight:bold;"></p>
