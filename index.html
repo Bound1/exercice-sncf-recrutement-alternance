@@ -60,7 +60,6 @@
                                 $("#corps_tableau_affichage_trains").append(`${html}`).on("click","[id^='train_numero_']",function(){ // id commence par "train_numero_"
                                     id=$(this).attr("id").slice(13);
                                     id_selectionne=id;
-                                    console.log(id_selectionne);
                                     jours.forEach(function(jour){
                                         index=tableau_trains_affiche_ids.findIndex((element) => element==id);
                                         console.log(index);
@@ -126,8 +125,12 @@
                     });
                     console.log(donnees_recuperees);
                     $.post("php_telechargement_donnees.php",{mode:"modifier",id:id_selectionne,donnees:donnees_recuperees},function(data){
-                        console.log(data)
-                        alert("La base de données a été modifié");
+                        alert("La base de données a été modifié.");
+                    });
+                });
+                $("#supprimer_train").click(function(){
+                    $.post("php_telechargement_donnees.php",{mode:"supprimer",id:id_selectionne},function(data){
+                        alert("Le train a été supprimé.");
                     });
                 });               
                 $("#bouton_choix_jour").click(function(){        

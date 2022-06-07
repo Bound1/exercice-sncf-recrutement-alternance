@@ -96,7 +96,12 @@ if(isset($_POST["mode"]) && $_POST["mode"]=="modifier"){
     $Dimanche=$donnees_recuperes["Dimanche"];
     $id=$_POST["id"];
     $requete="REPLACE INTO table_sncf VALUES ('$Date_deb','$Date_fin','$Train','$Lundi','$Mardi','$Mercredi','$Jeudi','$Vendredi','$Samedi','$Dimanche','$id')";
-    echo $requete;
+    $connexion= mysqli_connect($nom_serveur,$nom_utilisateur,$mot_de_passe,$base_de_donnees);
+    $resultat_requete_liste_trains=mysqli_query($connexion,$requete);
+}
+if(isset($_POST["mode"]) && $_POST["mode"]=="supprimer"){
+    $id=$_POST["id"];
+    $requete="DELETE FROM table_sncf WHERE id='$id';";
     $connexion= mysqli_connect($nom_serveur,$nom_utilisateur,$mot_de_passe,$base_de_donnees);
     $resultat_requete_liste_trains=mysqli_query($connexion,$requete);
 }
