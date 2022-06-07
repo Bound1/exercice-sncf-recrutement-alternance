@@ -13,7 +13,6 @@
         <script>
             function liste_jours_circulant_pas_en_phrase(jours_vide){
                 chaine_jours_vide="";
-                console.log(jours_vide);
                 if(jours_vide.length==0){}
                 else{                                  
                     if(jours_vide.length==1){
@@ -39,7 +38,8 @@
             }
             $(document).ready(function(){ 
                 id_selectionne=undefined;  
-                liste_jours_vide={};             
+                liste_jours_vide={};          
+                dates={date_deb:[],date_fin:[]};   
                 $("#questionnaire").slideDown("slow");
                 $.post("php_telechargement_donnees.php", {mode:"old"},                   
                     function(data){
@@ -73,7 +73,12 @@
                                 trains_jours.forEach(function(element_bdd,index,_){
                                     liste_jours_vide[element_bdd["id"]]=[];
                                     html+='<tr>'; 
-                                    html+=`<th scope="row" id="train_numero_${element_bdd["id"]}">${element_bdd["Train"]}</th>`;                                            
+                                    if(index==0){
+                                        html+=`<th scope="row" id="train_numero_${element_bdd["id"]}" style="color:red;">${element_bdd["Train"]}</th>`;  
+                                    }
+                                    else{
+                                        html+=`<th scope="row" id="train_numero_${element_bdd["id"]}">${element_bdd["Train"]}</th>`;
+                                    }                                            
                                     jours.forEach(function(jour){
                                         if(element_bdd[jour]==0){
                                             liste_jours_vide[element_bdd["id"]].push(jour);
@@ -91,7 +96,6 @@
                                     id_selectionne=id;
                                     jours.forEach(function(jour){
                                         index=tableau_trains_affiche_ids.findIndex((element) => element==id);
-                                        console.log(index);
                                         if(trains_jours[index][jour]!=0){                                            
                                             $(`#${jour}`).prop("checked",true);
                                         }
@@ -105,6 +109,12 @@
                                     if(chaine_jours_vide!=""){
                                         $("#trains_ne_circulent_pas").text(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`);
                                     }
+                                    else{
+                                        $("#trains_ne_circulent_pas").text("");
+                                    }
+                                    index=tableau_trains_affiche_ids.findIndex((element) => element==id);
+                                    $("#Date_deb").val(trains_jours[index]["Date_deb"]);
+                                    $("#Date_fin").val(trains_jours[index]["Date_fin"]);
                                 });  
                                     jours_vide=liste_jours_vide[id_selectionne];
                                     chaine_jours_vide=liste_jours_circulant_pas_en_phrase(jours_vide);
@@ -112,6 +122,8 @@
                                         $("#trains_ne_circulent_pas").text(`Le train n° ${train} ne circule pas ${chaine_jours_vide}`);
                                     }
                                         $("#train").val(train);
+                                        $("#Date_deb").val(trains_jours[0]["Date_deb"]);
+                                        $("#Date_fin").val(trains_jours[0]["Date_fin"]);
                                     jours.forEach(function(jour){
                                         if(trains_jours[0][jour]!=0){                                            
                                             $(`#${jour}`).prop("checked",true);
@@ -141,7 +153,6 @@
                             donnees_recuperees[donnee]=$valeur;
                         }
                     });
-                    console.log(donnees_recuperees);
                     $.post("php_telechargement_donnees.php",{mode:"modifier",id:id_selectionne,donnees:donnees_recuperees},function(data){
                         alert("La base de données a été modifié.");
                     });
