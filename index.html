@@ -36,6 +36,17 @@
                 }
                 return chaine_jours_vide;
             }
+            function mettre_a_jour_train(data){   
+                $("#train_a_choisir").html("");             
+                trains=data["liste_trains"];
+                trains.forEach(function(train){
+                    $("#train_a_choisir").append(`<option value="${train}">${train}</option>`);
+                });                        
+                jours=data["liste_jours"];
+                jours.forEach(function(jour){
+                    $("#jour_a_choisir").append(`<option value="${jour}">${jour}</option>`);
+                });
+            }
             $(document).ready(function(){ 
                 id_selectionne=undefined;  
                 liste_jours_vide={};          
@@ -43,14 +54,7 @@
                 $("#questionnaire").slideDown("slow");
                 $.post("php_telechargement_donnees.php", {mode:"old"},                   
                     function(data){
-                        trains=data["liste_trains"];
-                        trains.forEach(function(train){
-                            $("#train_a_choisir").append(`<option value="${train}">${train}</option>`);
-                        });                        
-                        jours=data["liste_jours"];
-                        jours.forEach(function(jour){
-                            $("#jour_a_choisir").append(`<option value="${jour}">${jour}</option>`);
-                        });
+                        mettre_a_jour_train(data);
                     },'json'
                 );
                 $(".retour_accueil").click(function(){   
@@ -61,6 +65,11 @@
                     $("#affichage_trains").removeClass("vertical-center");
                     $("#affichage_trains,#affichage_jours").slideUp();
                     $("#questionnaire").slideDown();
+                    $.post("php_telechargement_donnees.php", {mode:"old"},                   
+                    function(data){
+                        mettre_a_jour_train(data);
+                    },'json'
+                );
                 });
                 $("#bouton_choix_train").click(function(){
                     $("#corps_tableau_affichage_trains").html("");
