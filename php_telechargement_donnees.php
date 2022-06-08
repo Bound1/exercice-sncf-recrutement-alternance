@@ -57,8 +57,8 @@ if(isset($_POST["mode"]) && $_POST["mode"]=="old"){
 if(isset($_POST["mode"]) && $_POST["mode"]=="ajout"){
     function transformer_tableau_en_requete(){
         $jours=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
-        $date_debut=$_POST["date_debut"];
-        $date_fin=$_POST["date_fin"];
+        $date_debut=$_POST["Date_deb"];
+        $date_fin=$_POST["Date_fin"];
         $train=$_POST["train"];
         $requete_colonne="INSERT INTO table_sncf (Date_deb,Date_fin,Train,";   
         $requete_valeurs="'$date_debut','$date_fin','$train',";     
@@ -80,6 +80,7 @@ if(isset($_POST["mode"]) && $_POST["mode"]=="ajout"){
     $tableau_jour_semaine=$_POST["tableau_jour_semaine"];    
     $connexion= mysqli_connect($nom_serveur,$nom_utilisateur,$mot_de_passe,$base_de_donnees);
     $resultat_requete_liste_trains=mysqli_query($connexion,transformer_tableau_en_requete());
+    echo transformer_tableau_en_requete();
     mysqli_close($connexion);
 }
 if(isset($_POST["mode"]) && $_POST["mode"]=="modifier"){

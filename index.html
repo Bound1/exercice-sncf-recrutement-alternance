@@ -53,7 +53,12 @@
                         });
                     },'json'
                 );
-                $(".retour_accueil").click(function(){
+                $(".retour_accueil").click(function(){   
+                    $("#trains_ne_circulent_pas").css("display","block");                 
+                    $("#en_dehors_du_formulaire").css("display","block");
+                    $("#bouton_confirmer_saisie").css("display","none");
+                    $("#formulaire_train").css("vertical-align","");
+                    $("#affichage_trains").removeClass("vertical-center");
                     $("#affichage_trains,#affichage_jours").slideUp();
                     $("#questionnaire").slideDown();
                 });
@@ -137,6 +142,28 @@
                     );     
                     $("#questionnaire").slideUp("slow");
                     $("#affichage_trains").slideDown("slow");
+                });
+                $("#bouton_saisir_train").click(function(){
+                    $("#trains_ne_circulent_pas").css("display","none");
+                    $("#en_dehors_du_formulaire").css("display","none");                    
+                    $("#bouton_confirmer_saisie").css("display","block");
+                    $("#affichage_trains").addClass("vertical-center");
+                    $("#questionnaire").slideUp("slow");
+                    $("#affichage_trains").slideDown("slow");
+                });
+                $("#bouton_confirmer_saisie").click(function(){
+                    jours.forEach(function(jour){
+                            entier_jour=$(`#${jour}`).is(':checked')?1:0;
+                            tableau_jour_semaine[jour]=entier_jour;
+                        });
+                        $.post("php_telechargement_donnees.php",
+                        {"Date_deb":$("#Date_deb").val(), 
+                        "Date_fin":$("#Date_fin").val(),
+                        "train":$("#train").val(),
+                        "tableau_jour_semaine":tableau_jour_semaine, "mode":"ajout",
+                    function(data){
+                        console.log(data);
+                    }});
                 });
                 $("#modifier_train").click(function(){
                     donnees_a_recuperer=["Date_deb","Date_fin","train","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -241,7 +268,7 @@
     </head>
     <body>
         <div class="container" id="questionnaire" style="display:none">
-            <p id="titre_de_la_page">Statistiques sur les trains</p>
+            <p id="titre_de_la_page">Gestion des trains</p>
             <p>Choisissez un jour de la semaine (premier bouton) pour connaître le nombre de trains par semaine ou un train (deuxième bouton) pour connaître la fréquence d'utilisation par semaine .</p>
             <label for="jour_a_choisir">Sélectionnez votre jour de la semaine: </label>
             <select id="jour_a_choisir" class="form-control">
@@ -251,10 +278,11 @@
             <label for="train_a_choisir">Sélectionnez votre train: </label>
             <select id="train_a_choisir" class="form-control">
             </select>
-            <button type="button" id="bouton_choix_train">Choisir</button><br>
+            <button type="button" id="bouton_choix_train">Choisir</button><br><br>
             <button type="button" id="bouton_saisir_train">Saisir nouveau train</button>
         </div>
         <div class="container" id="affichage_trains" style="display:none">
+            <div id="en_dehors_du_formulaire">
             <p id="voici_frequence" scope="row" style="text-align:center;font-weight:bold;"></p>
             <table class="table table-primary">
                 <thead class="thead-dark">
@@ -279,6 +307,7 @@
             
         <button id="modifier_train">Modifier train</button><br>
         <button id="supprimer_train">Supprimer train</button>
+        </div>
         <div id="formulaire_train">
             <label for="Date_deb">Date de début</label>
             <input id="Date_deb" type="date" value="2022-01-31">
@@ -307,9 +336,10 @@
                     <td><input id="Dimanche" type="checkbox"></td>
                 </tr>
             </table>
+            <button id="bouton_confirmer_saisie" style="display:none">Confirmer saisie</button><br>
+            <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
             <div class="alert alert-danger" id="trains_ne_circulent_pas" role="alert" > </div>
-            <button class="retour_accueil"> Retourner à l'accueil </button>
         </div>
         <div class="container" id="affichage_jours" style="display:none">
             <p scope="row" style="text-align:center;font-weight:bold;"> </p>
